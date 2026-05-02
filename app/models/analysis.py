@@ -1,5 +1,5 @@
 from sqlalchemy import Column,Integer,Float,ForeignKey,JSON,Text,String,TIMESTAMP,text,Enum as SAEnum
-from app.core.database import Base
+from app.db.database import Base
 from enum import Enum
 
 class Status(Enum):

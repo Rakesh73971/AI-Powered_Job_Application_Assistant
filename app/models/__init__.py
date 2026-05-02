@@ -1,4 +1,4 @@
-from app.core.database import Base
+from AI_Powered_Job_Application_Assistant.app.db.database import Base
 from .user import User
 from .resume import Resume
 from .jobdescription import JobDescription

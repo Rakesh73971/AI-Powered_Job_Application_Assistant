@@ -1,6 +1,6 @@
 from sqlalchemy import Column,Integer,String,Boolean,TIMESTAMP,text,Enum as SAEnum
 from enum import Enum as PyEnum
-from app.core.database import Base
+from app.db.database import Base
 
 class UserRole(PyEnum):
     ADMIN = "admin"

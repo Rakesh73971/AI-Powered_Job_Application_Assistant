@@ -1,5 +1,5 @@
 from sqlalchemy import Column,Integer,ForeignKey,String,Text,TIMESTAMP,text
-from app.core.database import Base
+from app.db.database import Base
 from enum import Enum
 
 class Tone(Enum):
