@@ -1,6 +1,7 @@
 from pydantic import BaseModel,EmailStr
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 
 class UserRole(str,Enum):
     admin = 'admin'
@@ -11,8 +12,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: UserRole
-    is_active: bool
-    created_at: datetime
+    is_active: Optional[bool]
 
 
 class UserResponse(BaseModel):
@@ -20,8 +20,11 @@ class UserResponse(BaseModel):
     full_name: str
     email: str
     role: str
-    is_active: str
+    is_active: bool
     created_at: datetime
 
     class Config:
         from_attributes=True
+
+class TokenData(BaseModel):
+    id:Optional[int] = None
