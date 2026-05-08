@@ -35,3 +35,10 @@ uvicorn==0.38.0
 httpx
 python-dotenv
 pytest
+langchain
+langchain-google-genai
+langchain-community
+chromadb
+pdfplumber
+celery
+sse-starlette
