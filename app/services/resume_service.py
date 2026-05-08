@@ -1,13 +1,18 @@
 from sqlalchemy.orm import Session
 from app.models.resume import Resume
-from fastapi import HTTPException,status
+from fastapi import HTTPException,status,Depends
+from app.core.oauth2 import get_current_user
+from .pdf_service import extract_text_from_pdf
 
-def add_resume_service(db:Session,resume):
+def add_resume_service(db:Session,resume,current_user=Depends(get_current_user)):
+    
+    extracted_text = extract_text_from_pdf(resume.file_path)
+
     db_resume = Resume(
-        user_id = resume.user_id,
+        user_id = current_user.id,
         file_name = resume.file_name,
         file_path = resume.file_path,
-        extracted_text = resume.extracted_text,
+        extracted_text = extracted_text,
         is_active = resume.is_active
     )
     db.add(db_resume)
