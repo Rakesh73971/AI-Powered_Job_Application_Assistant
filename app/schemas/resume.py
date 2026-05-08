@@ -5,9 +5,8 @@ from typing import Optional
 class ResumeCreate(BaseModel):
     file_name: str
     file_path: str
-    extracted_text: str
     is_active: bool
-    created_at: datetime
+
 
 class ResumeUpdate(BaseModel):
     file_name: Optional[str] = None
@@ -16,8 +15,10 @@ class ResumeUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 class ResumeResponse(ResumeCreate):
-    user_id: int
     id: int
+    user_id: int
+    extracted_text: Optional[str] = None
+    uploaded_at: datetime
 
     class Config:
         from_attributes = True
