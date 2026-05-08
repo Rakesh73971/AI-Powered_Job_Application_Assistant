@@ -14,7 +14,7 @@ router = APIRouter(
 
 @router.post('/',status_code=status.HTTP_201_CREATED,response_model=JobDescriptionResponse)
 def create_job_description(job_desc:JodDescriptionCreate,db:Session=Depends(get_db),current_user=Depends(get_current_user)):
-    job_desc = create_job_desc(db, job_desc)
+    job_desc = create_job_desc(db, job_desc,current_user)
     return job_desc
 
 
