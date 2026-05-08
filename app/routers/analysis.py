@@ -13,7 +13,7 @@ router = APIRouter(
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=AnalysisReportResponse)
 def create_analysis_report(analysis: AnalysisReportCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    return create_analysis(db, analysis, current_user.id)
+    return create_analysis(db, analysis, current_user)
 
 @router.get('/', status_code=status.HTTP_200_OK, response_model=List[AnalysisReportResponse])
 def get_all_analyses(db: Session = Depends(get_db), current_user = Depends(get_admin_user)):
