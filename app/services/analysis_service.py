@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
 from app.models.analysis import AnalysisReport
-from fastapi import status, HTTPException
+from fastapi import status, HTTPException,Depends
+from app.core.oauth2 import get_current_user
 
-def create_analysis(db: Session, analysis, user_id: int):
+def create_analysis(db: Session, analysis, current_user=Depends(get_current_user)):
     db_analysis = AnalysisReport(
-        user_id=user_id,
+        user_id=current_user.id,
         resume_id=analysis.resume_id,
         jd_id=analysis.jd_id
     )
