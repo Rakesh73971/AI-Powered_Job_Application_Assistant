@@ -14,7 +14,7 @@ router = APIRouter(
 
 @router.post('/',status_code=status.HTTP_201_CREATED,response_model=ResumeResponse)
 def add_resume(resume:ResumeCreate,db:Session=Depends(get_db),current_user=Depends(get_current_user)):
-    return add_resume_service(db,resume)
+    return add_resume_service(db,resume,current_user)
 
 
 
