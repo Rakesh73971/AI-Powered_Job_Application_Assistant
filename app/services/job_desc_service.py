@@ -1,13 +1,14 @@
 from sqlalchemy.orm import Session
 from app.models.jobdescription import JobDescription
-from fastapi import status,HTTPException
+from fastapi import status,HTTPException,Depends
+from app.core.oauth2 import get_current_user
 
-def create_job_desc(db:Session,job):
+def create_job_desc(db:Session,job,current_user=Depends(get_current_user)):
     db_job = JobDescription(
-        user_id = job.user_id,
+        user_id = current_user.id,
         company_name = job.company_name,
         role_title = job.role_title,
-        jb_text = job.jb_text,
+        jd_text = job.jd_text,
     )
     db.add(db_job)
     db.commit()
