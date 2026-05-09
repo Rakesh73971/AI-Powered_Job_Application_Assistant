@@ -12,7 +12,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: UserRole
-    is_active: Optional[bool]
+    is_active: Optional[bool] = True
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
