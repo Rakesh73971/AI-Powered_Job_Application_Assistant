@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pydantic import ConfigDict
 from datetime import datetime
 from typing import Optional, Dict, Any, List, Union
 from app.models.analysis import Status
@@ -28,5 +29,4 @@ class AnalysisReportResponse(AnalysisReportCreate):
     task_id: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
