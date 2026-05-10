@@ -4,7 +4,7 @@ from vectorstore.chroma_client import resume_collection, jd_collection
 from app.core.config import settings
 
 embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/gemini-embedding-001",
+    model=settings.google_embedding_model,
     google_api_key=settings.google_api_key
 )
 
