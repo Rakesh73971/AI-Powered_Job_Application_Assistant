@@ -3,3 +3,4 @@ venv
 .env
 uploads
 chroma_db/f275886d-49a0-4e1d-b083-4bf0eef3656a
+scratch/
