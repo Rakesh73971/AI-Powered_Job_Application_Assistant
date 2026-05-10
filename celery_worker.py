@@ -16,3 +16,6 @@ celery_app.conf.update(
     enable_utc=True,
     task_track_started=True,
 )
+
+if __name__ == "__main__":
+    celery_app.start()
