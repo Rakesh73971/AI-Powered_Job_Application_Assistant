@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.get('/cover_letter', response_class=EventSourceResponse)
+@router.get('/cover_letters', response_class=EventSourceResponse)
 async def stream_cover_letter_endpoint(
     analysis_id: int = Query(..., description="ID of the AnalysisReport to generate cover letter for"),
     tone: str = Query("professional", description="Tone of cover letter: professional, conversational, enthusiastic"),
@@ -36,7 +36,7 @@ async def stream_cover_letter_endpoint(
     return EventSourceResponse(event_generator())
 
 
-@router.post('/cover_letter/generate', response_model=CoverLetterResponse)
+@router.post('/cover_letters/generate', response_model=CoverLetterResponse)
 def generate_cover_letter_endpoint(
     analysis_id: int = Query(...),
     tone: str = Query("professional"),
