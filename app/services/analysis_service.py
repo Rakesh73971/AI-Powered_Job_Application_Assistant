@@ -46,12 +46,15 @@ def get_analysis_status(db: Session, analysis_id: int):
     """Returns DB record + live Celery task status."""
     analysis = get_analysis(db, analysis_id)
     celery_status = None
+    error_message = None
 
     if analysis.task_id:
         try:
             from celery_worker import celery_app
             task_result = celery_app.AsyncResult(analysis.task_id)
             celery_status = task_result.state
+            if celery_status == 'FAILURE':
+                error_message = str(task_result.result) if task_result.result else "Unknown error"
         except Exception:
             celery_status = "UNKNOWN"
 
@@ -60,6 +63,7 @@ def get_analysis_status(db: Session, analysis_id: int):
         "task_id": analysis.task_id,
         "db_status": analysis.status.value if hasattr(analysis.status, 'value') else analysis.status,
         "celery_status": celery_status,
+        "error_message": error_message,
         "match_score": analysis.match_score,
         "missing_skills": analysis.missing_skills,
         "weak_sections": analysis.weak_sections,
