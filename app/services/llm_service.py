@@ -3,16 +3,20 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
 from app.core.config import settings
 
-# Google Gemini LLM
+# Main LLM
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from app.core.config import settings
+
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-2.5-flash",
     google_api_key=settings.google_api_key,
     temperature=0.3
 )
 
-# Streaming LLM (same model, used for SSE cover letter)
 streaming_llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-2.5-flash",
     google_api_key=settings.google_api_key,
     temperature=0.7,
     streaming=True
@@ -28,7 +32,7 @@ Resume:
 Job Description:
 {jd_context}
 
-Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
+Return ONLY valid JSON with this exact structure:
 {{
   "match_score": <integer 0-100>,
   "missing_skills": ["skill1", "skill2"],
@@ -47,13 +51,12 @@ Resume:
 Job Description:
 {jd_context}
 
-Write a compelling, personalized cover letter. Return only the cover letter text.
+Write a compelling personalized cover letter.
+Return only the cover letter text.
 """)
 
 gap_chain = gap_analysis_prompt | llm | JsonOutputParser()
 
-# Streaming chain — used only for SSE endpoint (astream)
 cover_chain = cover_letter_prompt | streaming_llm | StrOutputParser()
 
-# Non-streaming chain — used for synchronous generate endpoint (invoke)
-generate_cover_letter_chain = cover_letter_prompt | llm | StrOutputParser()
+generate_cover_letter_chain = cover_letter_prompt | llm | StrOutputParser()
