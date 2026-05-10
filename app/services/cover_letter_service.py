@@ -37,9 +37,15 @@ def generate_cover_letter_service(db: Session, analysis_id: int, tone: str):
         tone=tone,
         content=content
     )
+
     db.add(letter)
+
+    # Save latest cover letter in analyses table
+    analysis.cover_letter = content
+
     db.commit()
     db.refresh(letter)
+
     return letter
 
 
@@ -74,21 +80,36 @@ async def stream_cover_letter(analysis_id: int, tone: str, db: Session):
             tone=tone,
             content=full_content
         )
+
         db.add(letter)
+
+        analysis.cover_letter = full_content
+
         db.commit()
     except Exception as e:
         print(f"[WARNING] Failed to save cover letter to DB: {e}")
 
 
 def create_cover_letter_service(db: Session, cover_letter):
+
     letter = CoverLetterHistory(
         report_id=cover_letter.report_id,
         tone=cover_letter.tone,
         content=cover_letter.content
     )
+
     db.add(letter)
+
+    analysis = db.query(AnalysisReport).filter(
+        AnalysisReport.id == cover_letter.report_id
+    ).first()
+
+    if analysis:
+        analysis.cover_letter = cover_letter.content
+
     db.commit()
     db.refresh(letter)
+
     return letter
 
 
@@ -130,4 +151,4 @@ def delete_cover_letter(db: Session, letter_id: int):
         )
     db.delete(cover_letter)
     db.commit()
-    return None
+    return None
