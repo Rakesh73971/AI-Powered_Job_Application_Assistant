@@ -85,4 +85,21 @@ def test_job_description(authorized_access):
     response = authorized_access.post('/job_descriptions/',json=request_data)
     return response.json()
 
+@pytest.fixture
+def test_analysis_report(authorized_access, test_resume, test_job_description):
+    payload = {
+        "resume_id": test_resume["id"],
+        "jd_id": test_job_description["id"]
+    }
+    response = authorized_access.post("/analyses/", json=payload)
+    return response.json()
 
+@pytest.fixture
+def test_cover_letter(authorized_access,test_analysis_report):
+    payload = {
+        "report_id":test_analysis_report['id'],
+        "tone":"formal",
+        "content":"Dear Manager, I am computer science student and I am willing to work with you. My skills are alligned with the requirements"
+    }
+    response = authorized_access.post('/cover_letters/',json=payload)
+    return response.json()
