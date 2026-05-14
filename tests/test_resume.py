@@ -13,10 +13,12 @@ def test_get_resumes(authorized_access):
     response = authorized_access.get('/resumes/')
     assert response.status_code == 200
 
+
 def test_get_resume(authorized_access,test_resume):
     resume_id = test_resume["id"]
     response = authorized_access.get(f"/resumes/{resume_id}")
     assert response.status_code == 200
+    
 
 def test_update_resume(authorized_access,test_resume):
     request_data = {
