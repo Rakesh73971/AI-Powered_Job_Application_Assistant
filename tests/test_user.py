@@ -29,6 +29,8 @@ def test_user_update(authorized_access,test_user):
     assert response.status_code == 200
     assert response.json()['full_name'] == "Rakesh Kumar"
 
+    
+
 def test_delete_user(authorized_access,test_user):
     response = authorized_access.delete(f"/users/{test_user['id']}")
     assert response.status_code == 204
