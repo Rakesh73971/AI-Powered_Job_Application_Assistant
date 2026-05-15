@@ -9,13 +9,13 @@ from .routers import oauth, user, resume, cover_letter, job_description, analysi
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: create DB tables and required directories
+    
     models.Base.metadata.create_all(bind=engine)
     os.makedirs("uploads/resumes", exist_ok=True)
     os.makedirs("chroma_db", exist_ok=True)
     print("[OK] AI-Powered Job Application Assistant started successfully.")
     yield
-    # Shutdown
+
     print("[STOP] Application shutting down.")
 
 
@@ -52,4 +52,4 @@ def root():
         "status": "running",
         "message": "AI-Powered Job Application Assistant API",
         "docs": "/docs"
-    }
+    }
