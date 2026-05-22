@@ -15,7 +15,7 @@ def create_job_desc(db: Session, job, current_user):
     db.commit()
     db.refresh(db_job)
 
-    # Index JD chunks in ChromaDB for RAG
+    
     try:
         if db_job.jd_text:
             embed_jd(db_job.id, db_job.jd_text)
@@ -63,4 +63,4 @@ def delete_job_desc(db: Session, jd_id: int):
         )
     db.delete(job_desc)
     db.commit()
-    return None
+    return None

@@ -43,8 +43,5 @@ def generate_cover_letter_endpoint(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    """
-    Non-streaming version: generate and save a cover letter synchronously.
-    Returns the full CoverLetterHistory record.
-    """
+   
     return generate_cover_letter_service(db, analysis_id, tone)

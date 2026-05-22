@@ -20,7 +20,7 @@ def add_resume_service(db: Session, file_name: str, file_path: str, user_id: int
     db.commit()
     db.refresh(db_resume)
 
-    # Index in ChromaDB for RAG (non-blocking — failure doesn't break upload)
+    
     try:
         if extracted_text:
             embed_resume(db_resume.id, extracted_text)
@@ -72,4 +72,4 @@ def delete_resume_service(db: Session, resume_id: int):
         )
     db.delete(resume)
     db.commit()
-    return None
+    return None

@@ -18,7 +18,7 @@ def run_analysis_task(self, analysis_id: int):
     """
     db = SessionLocal()
     try:
-        # Mark as PROCESSING
+        
         report = db.query(AnalysisReport).filter(AnalysisReport.id == analysis_id).first()
         if not report:
             return {"error": f"AnalysisReport {analysis_id} not found"}
@@ -26,7 +26,7 @@ def run_analysis_task(self, analysis_id: int):
         report.status = Status.PROCESSING
         db.commit()
 
-        # Fetch resume and JD text
+        
         resume = db.query(Resume).filter(Resume.id == report.resume_id).first()
         jd = db.query(JobDescription).filter(JobDescription.id == report.jd_id).first()
 
@@ -35,18 +35,18 @@ def run_analysis_task(self, analysis_id: int):
             db.commit()
             return {"error": "Resume or JD not found"}
 
-        # Use full extracted text as fallback if ChromaDB returns empty
+        
         query = f"{jd.role_title} at {jd.company_name}"
         resume_context = retrieve_resume_context(report.resume_id, query) or (resume.extracted_text or "")
         jd_context = retrieve_jd_context(report.jd_id, query) or jd.jd_text
 
-        # Run LLM gap analysis
+        
         result = gap_chain.invoke({
             "resume_context": resume_context,
             "jd_context": jd_context
         })
 
-        # Store results
+        
         report.match_score = float(result.get("match_score", 0))
         report.missing_skills = result.get("missing_skills", [])
         report.weak_sections = result.get("weak_sections", [])
@@ -62,7 +62,7 @@ def run_analysis_task(self, analysis_id: int):
 
     except Exception as exc:
         db.rollback()
-        # Mark as FAILED
+        
         try:
             report = db.query(AnalysisReport).filter(AnalysisReport.id == analysis_id).first()
             if report:

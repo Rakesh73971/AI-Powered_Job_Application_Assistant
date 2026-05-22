@@ -25,14 +25,14 @@ def upload_resume(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    # Validate PDF
+    
     if not file.filename.endswith(".pdf"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Only PDF files are accepted."
         )
 
-    # Save file to disk
+    
     user_dir = os.path.join(UPLOAD_DIR, str(current_user.id))
     os.makedirs(user_dir, exist_ok=True)
     file_path = os.path.join(user_dir, file.filename)
@@ -73,4 +73,4 @@ def patch_resume(id: int, resume: ResumeUpdate, db: Session = Depends(get_db), c
 
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_resume(id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return delete_resume_service(db, id)
+    return delete_resume_service(db, id)

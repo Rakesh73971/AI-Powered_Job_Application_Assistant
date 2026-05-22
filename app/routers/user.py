@@ -15,6 +15,8 @@ router = APIRouter(
 def create_db_user(user:UserCreate,db:Session=Depends(get_db)):
     return create_user(db,user)
 
+
+
 @router.get('/', status_code=status.HTTP_200_OK, response_model=List[UserResponse])
 def get_all_users(db: Session = Depends(get_db), current_user=Depends(get_admin_user)):
     return get_users(db)

@@ -24,7 +24,7 @@ def generate_cover_letter_service(db: Session, analysis_id: int, tone: str):
     resume_context = retrieve_resume_context(analysis.resume_id, query) or (resume.extracted_text or "")
     jd_context = retrieve_jd_context(analysis.jd_id, query) or jd.jd_text
 
-    # Run non-streaming cover chain — StrOutputParser ensures a plain string
+    
     raw = generate_cover_letter_chain.invoke({
         "resume_context": resume_context,
         "jd_context": jd_context,
@@ -73,7 +73,7 @@ async def stream_cover_letter(analysis_id: int, tone: str, db: Session):
         full_content += chunk
         yield chunk
 
-    # Save completed cover letter to DB
+    
     try:
         letter = CoverLetterHistory(
             report_id=analysis_id,

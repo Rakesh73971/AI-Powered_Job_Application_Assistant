@@ -15,7 +15,7 @@ def create_analysis(db: Session, analysis, current_user):
     db.commit()
     db.refresh(db_analysis)
 
-    # Dispatch background task (import here to avoid circular imports)
+    
     try:
         from app.tasks.analysis_task import run_analysis_task
         task = run_analysis_task.delay(db_analysis.id)

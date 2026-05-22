@@ -21,7 +21,7 @@ def create_analysis_report(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
-    """Trigger async analysis. Returns immediately with status=pending and task_id."""
+    
     return create_analysis(db, analysis, current_user)
 
 
@@ -31,7 +31,7 @@ def poll_analysis_status(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ) -> Any:
-    """Poll the live status of an analysis task (DB + Celery state)."""
+    
     return get_analysis_status(db, id)
 
 

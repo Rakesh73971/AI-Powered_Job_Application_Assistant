@@ -13,7 +13,7 @@ def retrieve_resume_context(resume_id: int, query: str, top_k: int = 5) -> str:
     results = resume_collection.query(
         query_embeddings=[query_vector],
         n_results=top_k,
-        where={"resume_id": resume_id}   # removed str()
+        where={"resume_id": resume_id}   
     )
 
     docs = results.get("documents", [[]])[0]
