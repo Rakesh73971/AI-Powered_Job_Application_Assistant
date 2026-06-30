@@ -1,11 +1,5 @@
 from sqlalchemy import Column,Integer,ForeignKey,String,Text,TIMESTAMP,text
 from app.db.database import Base
-from enum import Enum
-
-class Tone(Enum):
-    FORMAL = 'formal'
-    CONVERSATIONAL = 'conversational'
-    CONFIDENT = 'confident'
 
 class CoverLetterHistory(Base):
     __tablename__="cover_letter_histories"
