@@ -2,6 +2,9 @@ __pycache__/
 venv
 .env
 uploads
-chroma_db/f275886d-49a0-4e1d-b083-4bf0eef3656a
-chroma_db/94619a96-137e-46c6-a932-bc976e17f848
+chroma_db
 scratch/
+
+# Repowise and MCP metadata files
+.repowise/
+.mcp.json
