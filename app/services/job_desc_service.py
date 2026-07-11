@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.jobdescription import JobDescription
 from fastapi import status, HTTPException
-from app.services.embedding_service import embed_jd
+from app.ai.rag.indexer import embed_jd
 
 
 def create_job_desc(db: Session, job, current_user):

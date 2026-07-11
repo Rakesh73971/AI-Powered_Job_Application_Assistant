@@ -4,8 +4,8 @@ from app.models.coverletter import CoverLetterHistory
 from app.models.analysis import AnalysisReport
 from app.models.resume import Resume
 from app.models.jobdescription import JobDescription
-from app.services.rag_service import retrieve_resume_context, retrieve_jd_context
-from app.services.llm_service import cover_chain, generate_cover_letter_chain
+from app.ai.rag.retriever import retrieve_resume_context, retrieve_jd_context
+from app.ai.chains.cover_letter_chain import cover_chain, generate_cover_letter_chain
 
 
 def generate_cover_letter_service(db: Session, analysis_id: int, tone: str):

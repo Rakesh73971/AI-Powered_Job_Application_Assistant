@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.resume import Resume
 from fastapi import HTTPException, status
 from .pdf_service import extract_text_from_pdf
-from .embedding_service import embed_resume
+from app.ai.rag.indexer import embed_resume
 
 
 def add_resume_service(db: Session, file_name: str, file_path: str, user_id: int):
