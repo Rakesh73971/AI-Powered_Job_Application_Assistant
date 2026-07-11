@@ -3,8 +3,8 @@ from app.db.database import SessionLocal
 from app.models.analysis import AnalysisReport, Status
 from app.models.resume import Resume
 from app.models.jobdescription import JobDescription
-from app.services.rag_service import retrieve_resume_context, retrieve_jd_context
-from app.services.llm_service import gap_chain
+from app.ai.rag.retriever import retrieve_resume_context, retrieve_jd_context
+from app.ai.chains.gap_analysis_chain import gap_chain
 
 
 @celery_app.task(bind=True, name="run_analysis_task")
