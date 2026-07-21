@@ -23,7 +23,6 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./chroma_db:/app/chroma_db
-      - ./vectorstore:/app/vectorstore
 
   db:
     image: postgres:15-alpine
