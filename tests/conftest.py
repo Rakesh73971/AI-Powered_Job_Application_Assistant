@@ -1,39 +1,36 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.config import settings
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from app.db.database import Base,get_db
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.pool import NullPool
+from app.db.database import Base, get_db
 from app.core.oauth2 import create_access_token
 import pytest
+import asyncio
 
+SQLALCHEMY_DATABASE_URL = f"postgresql+asyncpg://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test"
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test"
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-TestingSessionLocal = sessionmaker(bind=engine,autoflush=False,autocommit=False)
-
-Base.metadata.create_all(bind=engine)
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, poolclass=NullPool)
+TestingSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
 @pytest.fixture
 def session():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    db=TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    async def reset_db():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.create_all)
     
+    asyncio.run(reset_db())
+    yield
+
 @pytest.fixture
 def client(session):
-    def override_get_db():
-        try:
-            yield session
-        finally:
-            session.close()
+    async def override_get_db():
+        async with TestingSessionLocal() as db_session:
+            yield db_session
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
+    app.dependency_overrides.clear()
 
 @pytest.fixture
 def test_user(client):
