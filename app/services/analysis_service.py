@@ -1,9 +1,9 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.analysis import AnalysisReport, Status
 from fastapi import status, HTTPException
+from sqlalchemy import select
 
-
-def create_analysis(db: Session, analysis, current_user):
+async def create_analysis(db: AsyncSession, analysis, current_user):
     """Create analysis record and dispatch Celery task for async processing."""
     db_analysis = AnalysisReport(
         user_id=current_user.id,
@@ -12,28 +12,33 @@ def create_analysis(db: Session, analysis, current_user):
         status=Status.PENDING
     )
     db.add(db_analysis)
-    db.commit()
-    db.refresh(db_analysis)
+    await db.commit()
+    await db.refresh(db_analysis)
 
     
     try:
         from app.tasks.analysis_task import run_analysis_task
         task = run_analysis_task.delay(db_analysis.id)
         db_analysis.task_id = task.id
-        db.commit()
-        db.refresh(db_analysis)
+        await db.commit()
+        await db.refresh(db_analysis)
     except Exception as e:
         print(f"[WARNING] Celery dispatch failed: {e}. Analysis will stay PENDING.")
 
     return db_analysis
 
 
-def get_analyses(db: Session):
-    return db.query(AnalysisReport).all()
+async def get_analyses(db: AsyncSession):
+    result = await db.execute(select(AnalysisReport))
+    analysis = result.scalars().all()
+    return analysis
 
 
-def get_analysis(db: Session, analysis_id: int):
-    analysis = db.query(AnalysisReport).filter(AnalysisReport.id == analysis_id).first()
+async def get_analysis(db: AsyncSession, analysis_id: int):
+    results = await db.execute(select(AnalysisReport).where(AnalysisReport.id == analysis_id))
+
+    analysis = results.scalar_one_or_none()
+
     if not analysis:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -42,7 +47,7 @@ def get_analysis(db: Session, analysis_id: int):
     return analysis
 
 
-def get_analysis_status(db: Session, analysis_id: int):
+async def get_analysis_status(db: AsyncSession, analysis_id: int):
     """Returns DB record + live Celery task status."""
     analysis = get_analysis(db, analysis_id)
     celery_status = None
@@ -72,8 +77,9 @@ def get_analysis_status(db: Session, analysis_id: int):
     }
 
 
-def update_analysis(db: Session, analysis_id: int, analysis_update):
-    analysis = db.query(AnalysisReport).filter(AnalysisReport.id == analysis_id).first()
+async def update_analysis(db: AsyncSession, analysis_id: int, analysis_update):
+    results = await db.execute(select(AnalysisReport).where(AnalysisReport.id == analysis_id))
+    analysis = results.scalar_one_or_none()
     if not analysis:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -82,18 +88,19 @@ def update_analysis(db: Session, analysis_id: int, analysis_update):
     update_data = analysis_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(analysis, key, value)
-    db.commit()
-    db.refresh(analysis)
+    await db.commit()
+    await db.refresh(analysis)
     return analysis
 
 
-def delete_analysis(db: Session, analysis_id: int):
-    analysis = db.query(AnalysisReport).filter(AnalysisReport.id == analysis_id).first()
+async def delete_analysis(db: AsyncSession, analysis_id: int):
+    results = await db.execute(select(AnalysisReport).where(AnalysisReport.id == analysis_id))
+    analysis = results.scalar_one_or_none()
     if not analysis:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Analysis report with id {analysis_id} not found"
         )
-    db.delete(analysis)
-    db.commit()
+    await db.delete(analysis)
+    await db.commit()
     return None
