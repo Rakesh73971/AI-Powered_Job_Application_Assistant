@@ -1,6 +1,6 @@
 import pdfplumber
 
-def extract_text_from_pdf(pdf_path: str) -> str:
+async def extract_text_from_pdf(pdf_path: str) -> str:
     extracted_text = ""
     try:
         with pdfplumber.open(pdf_path) as pdf:
