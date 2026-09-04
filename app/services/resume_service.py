@@ -1,12 +1,18 @@
-import os
-from sqlalchemy.orm import Session
-from app.models.resume import Resume
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from fastapi import HTTPException, status
+
+from app.models.resume import Resume
 from .pdf_service import extract_text_from_pdf
 from app.ai.rag.indexer import embed_resume
 
 
-def add_resume_service(db: Session, file_name: str, file_path: str, user_id: int):
+async def add_resume_service(
+    db: AsyncSession,
+    file_name: str,
+    file_path: str,
+    user_id: int
+):
     extracted_text = extract_text_from_pdf(file_path)
 
     db_resume = Resume(
@@ -16,60 +22,122 @@ def add_resume_service(db: Session, file_name: str, file_path: str, user_id: int
         extracted_text=extracted_text,
         is_active=True
     )
-    db.add(db_resume)
-    db.commit()
-    db.refresh(db_resume)
 
-    
+    db.add(db_resume)
+
+    await db.commit()
+    await db.refresh(db_resume)
+
     try:
         if extracted_text:
-            embed_resume(db_resume.id, extracted_text)
+            embed_resume(
+                db_resume.id,
+                extracted_text
+            )
     except Exception as e:
-        print(f"[WARNING] ChromaDB embedding failed for resume {db_resume.id}: {e}")
+        print(
+            f"[WARNING] ChromaDB embedding failed "
+            f"for resume {db_resume.id}: {e}"
+        )
 
     return db_resume
 
 
-def get_resume_services(db: Session):
-    return db.query(Resume).all()
+async def get_resume_services(
+    db: AsyncSession
+):
+    result = await db.execute(
+        select(Resume)
+    )
+
+    return result.scalars().all()
 
 
-def get_user_resumes(db: Session, user_id: int):
-    return db.query(Resume).filter(Resume.user_id == user_id).all()
+async def get_user_resumes(
+    db: AsyncSession,
+    user_id: int
+):
+    result = await db.execute(
+        select(Resume).where(
+            Resume.user_id == user_id
+        )
+    )
+
+    return result.scalars().all()
 
 
-def get_resume_service(db: Session, resume_id: int):
-    resume = db.query(Resume).filter(Resume.id == resume_id).first()
+async def get_resume_service(
+    db: AsyncSession,
+    resume_id: int
+):
+    result = await db.execute(
+        select(Resume).where(
+            Resume.id == resume_id
+        )
+    )
+
+    resume = result.scalar_one_or_none()
+
     if not resume:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Resume with id {resume_id} not found"
         )
+
     return resume
 
 
-def update_resume_service(db: Session, resume_id: int, resume_update):
-    resume = db.query(Resume).filter(Resume.id == resume_id).first()
+async def update_resume_service(
+    db: AsyncSession,
+    resume_id: int,
+    resume_update
+):
+    result = await db.execute(
+        select(Resume).where(
+            Resume.id == resume_id
+        )
+    )
+
+    resume = result.scalar_one_or_none()
+
     if not resume:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Resume with id {resume_id} not found"
         )
-    update_data = resume_update.model_dump(exclude_unset=True)
+
+    update_data = resume_update.model_dump(
+        exclude_unset=True
+    )
+
     for key, value in update_data.items():
         setattr(resume, key, value)
-    db.commit()
-    db.refresh(resume)
+
+    await db.commit()
+    await db.refresh(resume)
+
     return resume
 
 
-def delete_resume_service(db: Session, resume_id: int):
-    resume = db.query(Resume).filter(Resume.id == resume_id).first()
+async def delete_resume_service(
+    db: AsyncSession,
+    resume_id: int
+):
+    result = await db.execute(
+        select(Resume).where(
+            Resume.id == resume_id
+        )
+    )
+
+    resume = result.scalar_one_or_none()
+
     if not resume:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Resume with id {resume_id} not found"
         )
-    db.delete(resume)
-    db.commit()
+
+    await db.delete(resume)
+    await db.commit()
+
     return None
