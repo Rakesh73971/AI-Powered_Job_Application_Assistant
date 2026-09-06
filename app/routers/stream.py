@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 from app.db.database import get_db
 from app.core.oauth2 import get_current_user
@@ -16,7 +16,7 @@ router = APIRouter(
 async def stream_cover_letter_endpoint(
     analysis_id: int = Query(..., description="ID of the AnalysisReport to generate cover letter for"),
     tone: str = Query("professional", description="Tone of cover letter: professional, conversational, enthusiastic"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
     """
@@ -37,11 +37,11 @@ async def stream_cover_letter_endpoint(
 
 
 @router.post('/cover_letters/generate', response_model=CoverLetterResponse)
-def generate_cover_letter_endpoint(
+async def generate_cover_letter_endpoint(
     analysis_id: int = Query(...),
     tone: str = Query("professional"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
    
-    return generate_cover_letter_service(db, analysis_id, tone)
+    return await generate_cover_letter_service(db, analysis_id, tone)
