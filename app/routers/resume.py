@@ -1,7 +1,7 @@
 import os
 import shutil
 from fastapi import APIRouter, Depends, status, UploadFile, File, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.resume import ResumeResponse, ResumeUpdate
 from app.db.database import get_db
 from app.services.resume_service import (
@@ -20,9 +20,9 @@ router = APIRouter(
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=ResumeResponse)
-def upload_resume(
+async def upload_resume(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
     
@@ -40,7 +40,7 @@ def upload_resume(
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return add_resume_service(
+    return await add_resume_service(
         db=db,
         file_name=file.filename,
         file_path=file_path,
@@ -49,28 +49,28 @@ def upload_resume(
 
 
 @router.get('/', status_code=status.HTTP_200_OK, response_model=List[ResumeResponse])
-def get_resumes(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+async def get_resumes(db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
     role_value = current_user.role.value if hasattr(current_user.role, 'value') else current_user.role
     if role_value == "admin":
-        return get_resume_services(db)
-    return get_user_resumes(db, current_user.id)
+        return await get_resume_services(db)
+    return await get_user_resumes(db, current_user.id)
 
 
 @router.get('/{id}', status_code=status.HTTP_200_OK, response_model=ResumeResponse)
-def get_resume(id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return get_resume_service(db, id)
+async def get_resume(id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    return await get_resume_service(db, id)
 
 
 @router.put('/{id}', status_code=status.HTTP_200_OK, response_model=ResumeResponse)
-def put_resume(id: int, resume: ResumeUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return update_resume_service(db, id, resume)
+async def put_resume(id: int, resume: ResumeUpdate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    return await update_resume_service(db, id, resume)
 
 
 @router.patch('/{id}', status_code=status.HTTP_200_OK, response_model=ResumeResponse)
-def patch_resume(id: int, resume: ResumeUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return update_resume_service(db, id, resume)
+async def patch_resume(id: int, resume: ResumeUpdate, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    return await update_resume_service(db, id, resume)
 
 
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_resume(id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    return delete_resume_service(db, id)
+async def delete_resume(id: int, db: AsyncSession = Depends(get_db), current_user=Depends(get_current_user)):
+    return await delete_resume_service(db, id)
