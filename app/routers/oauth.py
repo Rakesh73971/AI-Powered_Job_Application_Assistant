@@ -5,15 +5,17 @@ from app.models.user import User
 from app.core import oauth2
 from app.core.utils import verify_passwords
 from app.db.database import get_db
+from sqlalchemy import select
 
 router = APIRouter(tags=['Authentication'])
 
 @router.post("/login")
-def login_user(
+async def login_user(
     user_credentials:OAuth2PasswordRequestForm=Depends(),
     db:Session=Depends(get_db)
 ):
-    user = db.query(User).filter(User.email == user_credentials.username).first()
+    result = await db.execute(select(User).where(User.email == user_credentials.username))
+    user = result.scalar_one_or_none()
 
     if not user:
         raise HTTPException(
