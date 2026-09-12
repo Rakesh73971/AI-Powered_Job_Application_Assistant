@@ -5,12 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from app.db.database import engine
 from .routers import oauth, user, resume, cover_letter, job_description, analysis, stream
-
+from app.db.database import Base
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     
-    models.Base.metadata.create_all(bind=engine)
     os.makedirs("uploads/resumes", exist_ok=True)
     os.makedirs("chroma_db", exist_ok=True)
     print("[OK] AI-Powered Job Application Assistant started successfully.")
@@ -45,6 +44,11 @@ app.include_router(job_description.router)
 app.include_router(analysis.router)
 app.include_router(stream.router)
 
+@app.on_event("startup")
+async def startup_db_init():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 
 @app.get("/", tags=["Health"])
 def root():
@@ -53,3 +57,5 @@ def root():
         "message": "AI-Powered Job Application Assistant API",
         "docs": "/docs"
     }
+
+
